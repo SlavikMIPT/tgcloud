@@ -202,7 +202,7 @@ class TelegramClientX(TelegramClient):
                      file_size, part_count, part_size)
 
         with open(file, 'rb') if isinstance(file, str) else BytesIO(file) as stream:
-            threads_count = 2 + int((self._upload_threads_count - 2) * float(file_size) / (1024 * 1024 * 389))
+            threads_count = 2 + int((self._upload_threads_count - 2) * float(file_size) / (1024 * 1024 * 100))
             threads_count = min(threads_count, self._upload_threads_count)
             threads_count = min(part_count, threads_count)
             upload_thread = []
