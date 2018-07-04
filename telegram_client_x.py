@@ -60,6 +60,7 @@ class TelegramClientX(TelegramClient):
         self._phone_code_hash = {}
         self._phone = None
         self._session_name = session
+        self._upload_threads_count = 8
         # Sometimes we need to know who we are, cache the self peer
         self._self_input_peer = None
 
@@ -90,7 +91,8 @@ class TelegramClientX(TelegramClient):
             self.client.disconnect()
             print('Thread {0} stopped result {1}'.format(self.name, self.result))
             return
-
+    def set_upload_threads_count(self,count: int):
+        self._upload_threads_count = int(count)
     def upload_file(self,
                     file,
                     part_size_kb=None,
@@ -196,7 +198,7 @@ class TelegramClientX(TelegramClient):
                      file_size, part_count, part_size)
 
         with open(file, 'rb') if isinstance(file, str) else BytesIO(file) as stream:
-            threads_count = 24
+            threads_count = self._upload_threads_count
             if part_count < threads_count:
                 threads_count = part_count
             upload_thread = []
