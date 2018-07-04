@@ -29,7 +29,9 @@ import random
 import time
 from queue import Queue
 from telethon.network import ConnectionMode
-from datetime import datetime, timedelta
+from datetime import timedelta
+
+
 class TelegramClientX(TelegramClient):
     def __init__(self, session, api_id, api_hash,
                  connection_mode=ConnectionMode.TCP_FULL,
@@ -91,8 +93,10 @@ class TelegramClientX(TelegramClient):
             self.client.disconnect()
             print('Thread {0} stopped result {1}'.format(self.name, self.result))
             return
-    def set_upload_threads_count(self,count: int):
+
+    def set_upload_threads_count(self, count: int):
         self._upload_threads_count = int(count)
+
     def upload_file(self,
                     file,
                     part_size_kb=None,
@@ -198,7 +202,9 @@ class TelegramClientX(TelegramClient):
                      file_size, part_count, part_size)
 
         with open(file, 'rb') if isinstance(file, str) else BytesIO(file) as stream:
-            threads_count = self._upload_threads_count
+            threads_count = 2 + int((self._upload_threads_count - 2) * part_count * 0.000325520)
+            if threads_count > self._upload_threads_count:
+                threads_count = self._upload_threads_count
             if part_count < threads_count:
                 threads_count = part_count
             upload_thread = []
