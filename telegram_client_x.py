@@ -28,14 +28,46 @@ from threading import Thread
 import random
 import time
 from queue import Queue
-
-
+from telethon.network import ConnectionMode
+from datetime import datetime, timedelta
 class TelegramClientX(TelegramClient):
+    def __init__(self, session, api_id, api_hash,
+                 connection_mode=ConnectionMode.TCP_FULL,
+                 use_ipv6=False,
+                 proxy=None,
+                 update_workers=None,
+                 timeout=timedelta(seconds=10),
+                 spawn_read_thread=True,
+                 report_errors=True,
+                 **kwargs):
+        super().__init__(
+            session, api_id, api_hash,
+            connection_mode=connection_mode,
+            use_ipv6=use_ipv6,
+            proxy=proxy,
+            update_workers=update_workers,
+            spawn_read_thread=spawn_read_thread,
+            timeout=timeout,
+            report_errors=report_errors,
+            **kwargs
+        )
+
+        self._event_builders = []
+        self._events_pending_resolve = []
+
+        # Some fields to easy signing in. Let {phone: hash} be
+        # a dictionary because the user may change their mind.
+        self._phone_code_hash = {}
+        self._phone = None
+        self._session_name = session
+        # Sometimes we need to know who we are, cache the self peer
+        self._self_input_peer = None
+
     class ProcessUpload(Thread):
         def __init__(self, name, client, q_request=None):
             Thread.__init__(self)
             self.name = name
-            self.client = TelegramClient(client.session, client.api_id, client.api_hash, update_workers=None,
+            self.client = TelegramClient(client._session_name, client.api_id, client.api_hash, update_workers=None,
                                          spawn_read_thread=False)
             self.q_request = q_request
             self.result = None
@@ -164,7 +196,7 @@ class TelegramClientX(TelegramClient):
                      file_size, part_count, part_size)
 
         with open(file, 'rb') if isinstance(file, str) else BytesIO(file) as stream:
-            threads_count = 8
+            threads_count = 24
             if part_count < threads_count:
                 threads_count = part_count
             upload_thread = []
