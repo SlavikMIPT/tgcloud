@@ -1,9 +1,9 @@
-<h1>tgcloud</h1>
+# tgcloud
 
 Opensourse Telegram based cloud storage
 using:
 
-<pre>
+```
 from telegram_client_x import TelegramClientX
 
 client = TelegramClientX(entity, api_id, api_hash, update_workers=None, spawn_read_thread=True)
@@ -11,4 +11,4 @@ client = TelegramClientX(entity, api_id, api_hash, update_workers=None, spawn_re
 client.set_upload_threads_count(24)
 
 client.set_download_threads_count(8)
-</pre>
+```
