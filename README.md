@@ -1,8 +1,9 @@
 # tgcloud
+## Opensourсe Telegram based cloud storage
 
-Opensourсe Telegram based cloud storage
 ![Diagram](/img/ProjectDiagram.png)
-## Project structure:
+
+### Project structure:
 **tgcloud:** linux based docker container
 * **redis** - updates, rpc, communication
 * **tfs:** FUSE based VFS module
