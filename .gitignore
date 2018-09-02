@@ -1,0 +1,5 @@
+venv
+.idea
+*.session
+*.pyc
+file_telegram_rxtx/tg_access.py
