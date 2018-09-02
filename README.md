@@ -28,4 +28,5 @@ Opensourсe Telegram based cloud storage
   * rq communication interface
   * docker
 
-You are welcome to collaborate - contact t.me/SlavikMIPT
+You are welcome to collaborate - contact 
+Telegram: [@SlavikMIPT](t.me/SlavikMIPT)
