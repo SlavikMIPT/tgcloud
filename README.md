@@ -1,6 +1,6 @@
 # tgcloud
 
-Opensourse Telegram based cloud storage
+Opensourсe Telegram based cloud storage
 
 ## Project structure:
 **tgcloud:** linux based docker container
@@ -27,3 +27,5 @@ Opensourse Telegram based cloud storage
   * settings, statistics, monitoring...
   * rq communication interface
   * docker
+
+You are welcome to collaborate - contact t.me/SlavikMIPT
