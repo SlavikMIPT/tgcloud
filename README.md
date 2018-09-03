@@ -1,8 +1,10 @@
 # tgcloud
-## Opensourсe Telegram based cloud storage
-
-![Diagram](/img/ProjectDiagram.png)
-
+## Opensourсe Virtual Filesystem for Telegram
+Synchronizes and structures files downloaded to Telegram.
+- Stores only metadata, accessing raw data only when loading files.
+- Loading speed is up to 240Mbit/s per session
+- Multiplatform: provides standard volumes which can be mounted on linux/win/mac...
+- Opensource
 ### Project structure:
 **tgcloud:** linux based docker container
 * **redis** - updates, rpc, communication
@@ -28,6 +30,7 @@
   * settings, statistics, monitoring...
   * rq communication interface
   * docker
+![Diagram](/img/ProjectDiagram.png)
 
 You are welcome to collaborate - contact 
 Telegram: [@SlavikMIPT](t.me/SlavikMIPT)
