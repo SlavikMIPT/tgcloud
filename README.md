@@ -1,4 +1,5 @@
 # tgcloud
+## UNDER DEVELOPMENT
 ## Opensourсe Virtual Filesystem for Telegram
 Synchronizes and structures files downloaded to Telegram.
 - Stores only metadata, accessing raw data only when loading files.
