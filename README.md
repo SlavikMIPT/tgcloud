@@ -35,3 +35,4 @@ Synchronizes and structures files downloaded to Telegram.
 
 You are welcome to collaborate - contact 
 Telegram: [@SlavikMIPT](t.me/SlavikMIPT)
+Channel: [@MediaTube_stream](t.me/MediaTube_stream)
