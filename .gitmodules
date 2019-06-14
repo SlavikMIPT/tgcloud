@@ -1,6 +1,3 @@
-[submodule "tfs"]
-	path = tfs
-	url = https://github.com/SlavikMIPT/tfs
 [submodule "filebrowser"]
 	path = filebrowser
 	url = https://github.com/SlavikMIPT/filebrowser
