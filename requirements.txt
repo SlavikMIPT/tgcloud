@@ -1,3 +1,2 @@
 Telethon==0.18.3
-rq
-requests
+cryptg
