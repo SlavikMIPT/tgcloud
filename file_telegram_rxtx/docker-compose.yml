@@ -1,9 +1,0 @@
-version: '2'
-services:  
-  processing:
-    build: .
-    image: slavikmipt/audiotube-worker:processing
-    volumes:
-     - /etc/nfs:/etc/nfs
-    restart: always
-    command: processing

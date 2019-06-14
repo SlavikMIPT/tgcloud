@@ -7,11 +7,15 @@ import os
 import shutil
 import time
 import tempfile
+import mimetypes
 from telethon.tl.types import DocumentAttributeFilename
-
+from telethon.tl.types import Document
+from telethon.utils import get_input_media
+from telethon.errors.rpc_error_list import LocationInvalidError
 from telegram_client_x import TelegramClientX
+from telethon.tl.types import Message
 from tg_access import *
-from io import StringIO
+from io import BytesIO
 import sys
 
 
@@ -23,7 +27,7 @@ class Buffer:  # {{{1
     """
 
     def __init__(self):
-        self.buf = StringIO()
+        self.buf = BytesIO()
         self.dirty = False
 
     def __getattr__(self, attr, default=None):
@@ -53,8 +57,8 @@ class Buffer:  # {{{1
 path_home = './'  # os.path.abspath('.')
 path_local = './local'
 client = TelegramClientX(entity, api_id, api_hash, update_workers=None, spawn_read_thread=True)
-client.set_upload_threads_count(24)
-client.set_download_threads_count(8)
+client.set_upload_threads_count(24)#24
+client.set_download_threads_count(8)#8
 last_call_time_sent = time.time()
 last_call_time_receive = time.time()
 
@@ -78,28 +82,24 @@ def on_upload_progress(send_bytes, total_bytes):
 
 def download_block(chat_id, hash_uid):
     try:
+        hash_uid = str(hash_uid)
+        chat_id = str(chat_id)
         os.chdir(path_home)
         if not client.is_connected():
-            client.connect()
-        if not client.is_user_authorized():
-            client.send_code_request(phone)
-            client.sign_in(phone, input('Enter code: '))
-        chat_id = int(chat_id) if chat_id.isdigit() else str(chat_id)
+            client.start()
+        chat_id = int(chat_id) if chat_id.isdigit() else chat_id
         entity = client.get_entity(chat_id)
-        messages = client.get_messages(entity, limit=20)
-        for i in range(20):
+        messages = client.get_messages(entity, limit=40)
+        for i in range(len(messages)):
             msg = messages[i]
-            if msg.message == str(hash_uid):
+            if msg.message == hash_uid:
                 outbuf = tempfile.NamedTemporaryFile()
-                client.download_media(msg, file=outbuf, progress_callback=on_upload_progress)
-
+                client.download_media(msg, file=outbuf, progress_callback=on_download_progress)
                 outbuf.seek(0)
                 sys.stdout.buffer.write(outbuf.read())
                 outbuf.close()
                 return 0
-            return -1
-    except Exception as e:
-        # print(e)
+    except Exception:
         return -1
     finally:
         client.disconnect()
@@ -107,27 +107,24 @@ def download_block(chat_id, hash_uid):
 
 def upload_block(bytesin, chat_id, hash_uid):
     try:
-        filename = str(hash_uid)
+        hash_uid = str(hash_uid)
+        chat_id = str(chat_id)
         os.chdir(path_home)
         if not client.is_connected():
-            client.connect()
-        if not client.is_user_authorized():
-            client.send_code_request(phone)
-            client.sign_in(phone, input('Enter code: '))
-        chat_id = int(chat_id) if chat_id.isdigit() else str(chat_id)
+            client.start()
+        chat_id = int(chat_id) if chat_id.isdigit() else chat_id
         entity = client.get_entity(chat_id)
-        document_attribute = [DocumentAttributeFilename(filename)]
-        client.send_file(entity,
-                         file=bytesin,
-                         caption=str(hash_uid),
-                         file_name=filename,
-                         allow_cache=False,
-                         part_size_kb=512,
-                         attributes=document_attribute,
-                         progress_callback=on_upload_progress)
+        message = client.send_file(entity,
+                                     file=bytesin,
+                                     caption=f'{hash_uid}',
+                                     attributes=[DocumentAttributeFilename(f'{hash_uid}')],
+                                     allow_cache=False,
+                                     part_size_kb=512,
+                                     force_document=True,
+                                     progress_callback=on_upload_progress)
+        # message.id
         return 0
-    except Exception as e:
-        # print(e)
+    except Exception:
         return -1
     finally:
         client.disconnect()
@@ -161,5 +158,4 @@ if __name__ == '__main__':
 
     main(sys.argv[0:])
 
-# upload_file(48012045,48012045,'test2.mp4','4801204577235b9d06db52e7209086ebbc8',is_gif=False)
-# download_block(709766994,'012345678910abcdef')
+# download_block("slavikmr","660f320161344649cd5447986a9f68fb60eb9734")

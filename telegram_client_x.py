@@ -291,10 +291,11 @@ class TelegramClientX(TelegramClient):
 
     def download_file(self,
                       input_location,
-                      file,
+                      file=None,
                       part_size_kb=None,
                       file_size=None,
                       progress_callback=None):
+
         """
         Downloads the given input location to a file.
 
