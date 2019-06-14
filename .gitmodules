@@ -1,6 +1,0 @@
-[submodule "filebrowser"]
-	path = filebrowser
-	url = https://github.com/SlavikMIPT/filebrowser
-[submodule "dedupfs"]
-	path = dedupfs
-	url = https://github.com/xolox/dedupfs.git

@@ -1,0 +1,12 @@
+The included fuse.py module includes a single-line bug fix to the fuse.py file
+included with Ubuntu's Python 2.6 package for the method Timespec.__init__():
+
+    480c480
+    <     def __init__(self, name, **kw):
+    ---
+    >     def __init__(self, **kw):
+
+During initial development I used the following resources:
+ - http://sf.net/apps/mediawiki/fuse/index.php?title=FUSE_Python_Reference
+ - http://linux.die.net/man/2/path_resolution
+ - /usr/include/fuse/fuse.h :-(

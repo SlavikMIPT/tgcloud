@@ -1,0 +1,36 @@
+Here are some things on my to-do list, in no particular order:
+
+ * Automatically switch to a larger block size to reduce the overhead for files
+   that rarely change after being created (like >= 100MB video files :-)
+
+ * Implement the fsync(datasync) API method?
+   if datasync:
+    only flush user data (file contents)
+   else:
+    flush user & meta data (file contents & attributes)
+
+ * Implement rename() independently of link()/unlink() to improve performance?
+
+ * Implement `--verify-reads` option that recalculates hashes when reading to
+   check for data block corruption?
+
+ * `report_disk_usage()` has become way too expensive for regular status
+   reports because it takes more than a minute on a 7.0 GB database. The only
+   way it might work was if the statistics are only retrieved from the database
+   once and from then on kept up to date inside Python, but that seems like an
+   awful lot of work. For now I've removed the call to `report_disk_usage()`
+   from `print_stats()` and added a `--print-stats` command-line option that
+   reports the disk usage and then exits.
+
+ * Tag databases with a version number and implement automatic upgrades because
+   I've grown tired of upgrading my database by hand :-)
+
+ * Change the project name because `DedupFS` is already used by at least two
+   other projects? One is a distributed file system which shouldn't cause too
+   much confusion, but the other is a deduplicating file system as well :-\
+
+ * Support directory hard links without upsetting FUSE and add a command-line
+   option that instructs `dedupfs.py` to search for identical subdirectories
+   and replace them with directory hard links.
+
+ * Support files that don't fit in RAM (virtual machine disk images…)
