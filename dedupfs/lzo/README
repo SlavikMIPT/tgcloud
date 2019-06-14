@@ -1,0 +1,8 @@
+This is a simple binding to the canonical LZO compression library. To compile
+first make sure you have both liblzo2 and the headers installed (on Ubuntu you
+can install the packages `liblzo2' and `liblzo2-dev'), then run the command
+`python setup.py build && python setup.py install'.
+
+Please note that this is my first Python/C interfacing code so be careful :-)
+
+ - Peter Odding <peter@peterodding.com>
