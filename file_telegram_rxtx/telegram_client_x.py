@@ -82,8 +82,8 @@ class TelegramClientX(TelegramClient):
             self.result = None
 
         def run(self):
-            print('Thread %s started' % self.name)
-            time.sleep(random.randrange(200, 2000, 10) * 0.001)
+            # print('Thread %s started' % self.name)
+            # time.sleep(random.randrange(200, 2000, 10) * 0.001)
             if not self.client.is_connected():
                 self.client.connect()
             while True:
@@ -97,7 +97,7 @@ class TelegramClientX(TelegramClient):
                     break
                 self.q_request.task_done()
             self.client.disconnect()
-            print('Thread {0} stopped result {1}'.format(self.name, self.result))
+            # print('Thread {0} stopped result {1}'.format(self.name, self.result))
             return
 
     def set_upload_threads_count(self, count: int):
@@ -268,8 +268,8 @@ class TelegramClientX(TelegramClient):
             self.result = None
 
         def run(self):
-            print('Thread %s started' % self.name)
-            time.sleep(random.randrange(200, 2000, 10) * 0.001)
+            # print('Thread %s started' % self.name)
+            # time.sleep(random.randrange(200, 2000, 10) * 0.001)
             if not self.client.is_connected():
                 self.client.connect()
             while True:
@@ -286,7 +286,7 @@ class TelegramClientX(TelegramClient):
                     break
                 self.q_request.task_done()
             self.client.disconnect()
-            print('Thread {0} stopped result {1}'.format(self.name, self.result))
+            # print('Thread {0} stopped result {1}'.format(self.name, self.result))
             return
 
     def download_file(self,
