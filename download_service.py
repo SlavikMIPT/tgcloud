@@ -12,8 +12,8 @@ from telethon.tl.types import DocumentAttributeFilename
 from telethon.tl.types import Document
 from telethon.utils import get_input_media
 from telethon.errors.rpc_error_list import LocationInvalidError
-from telegram_client_x import TelegramClientX
-# from telethon.telegram_client import TelegramClient
+# from telegram_client_x import TelegramClientX
+from telethon.telegram_client import TelegramClient
 from telethon.tl.types import Message
 from tg_access import *
 from io import BytesIO
@@ -57,9 +57,11 @@ class Buffer:  # {{{1
 
 path_home = './'  # os.path.abspath('.')
 path_local = './local'
-client = TelegramClientX(entity, api_id, api_hash, update_workers=None, spawn_read_thread=True)
-client.set_upload_threads_count(24)#24
-client.set_download_threads_count(8)#8
+# client = TelegramClientX(entity, api_id, api_hash, update_workers=None, spawn_read_thread=True)
+client = TelegramClient(entity, api_id, api_hash, update_workers=None, spawn_read_thread=True)
+
+# client.set_upload_threads_count(24)#24
+# client.set_download_threads_count(8)#8
 last_call_time_sent = time.time()
 last_call_time_receive = time.time()
 if not client.is_connected():
