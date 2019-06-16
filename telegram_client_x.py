@@ -33,13 +33,13 @@ from threading import Thread
 import random
 import time
 from queue import Queue
-from telethon.network import ConnectionMode
+from telethon.network import ConnectionTcpFull
 from datetime import timedelta
 
 
 class TelegramClientX(TelegramClient):
     def __init__(self, session, api_id, api_hash,
-                 connection_mode=ConnectionMode.TCP_FULL,
+                 connection=ConnectionTcpFull,
                  use_ipv6=False,
                  proxy=None,
                  update_workers=None,
@@ -49,7 +49,7 @@ class TelegramClientX(TelegramClient):
                  **kwargs):
         super().__init__(
             session, api_id, api_hash,
-            connection_mode=connection_mode,
+            connection=connection,
             use_ipv6=use_ipv6,
             proxy=proxy,
             update_workers=update_workers,
@@ -347,6 +347,7 @@ class TelegramClientX(TelegramClient):
         # The used client will change if FileMigrateError occurs
         client = self
         cdn_decrypter = None
+        input_location = utils.get_input_loction(input_location)
         download_thread = []
         q_request = []
 
