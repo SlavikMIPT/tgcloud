@@ -13,6 +13,7 @@ from telethon.tl.types import Document
 from telethon.utils import get_input_media
 from telethon.errors.rpc_error_list import LocationInvalidError
 from telegram_client_x import TelegramClientX
+# from telethon.telegram_client import TelegramClient
 from telethon.tl.types import Message
 from tg_access import *
 from io import BytesIO
@@ -61,7 +62,8 @@ client.set_upload_threads_count(24)#24
 client.set_download_threads_count(8)#8
 last_call_time_sent = time.time()
 last_call_time_receive = time.time()
-
+if not client.is_connected():
+    client.start()
 
 def on_download_progress(recv_bytes, total_bytes):
     global last_call_time_receive
@@ -79,7 +81,7 @@ def on_upload_progress(send_bytes, total_bytes):
     # print(f"sent {send_bytes}/{total_bytes}", end="\r")
     return 0
 
-
+#
 def download_block(chat_id, hash_uid):
     try:
         hash_uid = str(hash_uid)
@@ -89,7 +91,7 @@ def download_block(chat_id, hash_uid):
             client.start()
         chat_id = int(chat_id) if chat_id.isdigit() else chat_id
         entity = client.get_entity(chat_id)
-        messages = client.get_messages(entity, limit=40)
+        messages = client.get_messages(entity, limit=40,search=hash_uid)
         for i in range(len(messages)):
             msg = messages[i]
             if msg.message == hash_uid:
@@ -158,4 +160,4 @@ if __name__ == '__main__':
 
     main(sys.argv[0:])
 
-# download_block("slavikmr","660f320161344649cd5447986a9f68fb60eb9734")
+# download_block("slavikmr","d46610254a0afb93228832bdb6122d27e4bcb6c8")
