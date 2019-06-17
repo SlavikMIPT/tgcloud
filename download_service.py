@@ -64,9 +64,11 @@ client = TelegramClient(entity, api_id, api_hash, update_workers=None, spawn_rea
 # client.set_download_threads_count(8)#8
 last_call_time_sent = time.time()
 last_call_time_receive = time.time()
-if not client.is_connected():
-    client.start()
-
+client.connect()
+if not client.is_user_authorized():
+    phone = input('Enter phone: ')
+    client.send_code_request(phone)
+    client.sign_in(phone, input('Enter code: '))
 def on_download_progress(recv_bytes, total_bytes):
     global last_call_time_receive
     if time.time() - last_call_time_receive < 1:
@@ -87,12 +89,7 @@ def on_upload_progress(send_bytes, total_bytes):
 def download_block(hash_uid,chat_id=None):
     try:
         hash_uid = str(hash_uid)
-        if chat_id:
-            chat_id = str(chat_id)
-            chat_id = int(chat_id) if chat_id.isdigit() else chat_id
         os.chdir(path_home)
-        if not client.is_connected():
-            client.start()
 
         entity = client.get_entity(client.get_me())
         messages = client.get_messages(entity, limit=40,search=hash_uid)
@@ -114,12 +111,7 @@ def download_block(hash_uid,chat_id=None):
 def upload_block(bytesin, hash_uid,chat_id=None):
     try:
         hash_uid = str(hash_uid)
-        if chat_id:
-            chat_id = str(chat_id)
-            chat_id = int(chat_id) if chat_id.isdigit() else chat_id
         os.chdir(path_home)
-        if not client.is_connected():
-            client.start()
         entity = client.get_entity(client.get_me())
         message = client.send_file(entity,
                                      file=bytesin,
