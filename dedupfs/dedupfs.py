@@ -1,4 +1,3 @@
-
 #!/usr/bin/python
 
 # Documentation. {{{1
@@ -66,7 +65,7 @@ from get_memory_usage import get_memory_usage
 
 from subprocess import Popen, PIPE
 
-chat_id = 12345
+# chat_id = 709766994
 def main():  # {{{1
     """
     This function enables using dedupfs.py as a shell script that creates FUSE
@@ -801,7 +800,7 @@ class DedupFS(fuse.Fuse):  # {{{1
             row = self.conn.execute('SELECT id FROM hashes WHERE hash = ?', (encoded_digest,)).fetchone()
             if row:
                 hash_id = row[0]
-                existing_block = self.decompress(self.__get_block_from_telegram(str(chat_id), digest.encode('hex')))
+                existing_block = self.decompress(self.__get_block_from_telegram(digest.encode('hex')))
                 # Check for hash collisions.
                 if new_block != existing_block:
                     # Found a hash collision: dump debugging info and exit.
@@ -821,7 +820,7 @@ class DedupFS(fuse.Fuse):  # {{{1
                 self.conn.execute('INSERT INTO "index" (inode, hash_id, block_nr) VALUES (?, ?, ?)',
                                   (inode, hash_id, block_nr))
             else:
-                process = Popen(["python3.6", "download_service.py", "upload", str(chat_id), digest.encode('hex')], stdin=PIPE,
+                process = Popen(["python3.6", "download_service.py", "upload", digest.encode('hex')], stdin=PIPE,
                                 bufsize=-1)
                 process.stdin.write(self.compress(new_block))
                 process.stdin.close()
@@ -883,7 +882,7 @@ class DedupFS(fuse.Fuse):  # {{{1
 
     def __verify_write(self, block, digest, block_nr, inode):  # {{{3
         if self.verify_writes:
-            saved_value = self.decompress(self.__get_block_from_telegram(str(chat_id), digest.encode('hex')))
+            saved_value = self.decompress(self.__get_block_from_telegram(digest.encode('hex')))
             if saved_value != block:
                 # The data block was corrupted when it was written or read.
                 dumpfile_corruption = '/tmp/dedupfs-corruption-%i' % time.time()
@@ -1169,9 +1168,9 @@ class DedupFS(fuse.Fuse):  # {{{1
             self.logger.info('Rolling back changes')
             self.conn.rollback()
 
-    def __get_block_from_telegram(self, chat_id, digest):
+    def __get_block_from_telegram(self, digest):
         buf = tempfile.NamedTemporaryFile()
-        process = Popen(["python3.6", "download_service.py", "download", str(chat_id), str(digest)], stdout=buf,
+        process = Popen(["python3.6", "download_service.py", "download", str(digest)], stdout=buf,
                         bufsize=-1, shell=False)
         process.wait()
         buf.seek(0)
@@ -1192,7 +1191,7 @@ class DedupFS(fuse.Fuse):  # {{{1
             for row in self.conn.execute(query, (inode,)).fetchall():
                 # TODO Make the file system more robust against failure by doing
                 # something sensible when self.blocks.has_key(digest) is false.
-                buf.write(self.decompress(self.__get_block_from_telegram(str(chat_id),str(row[0]))))
+                buf.write(self.decompress(self.__get_block_from_telegram(str(row[0]))))
             self.buffers[path] = buf
             return buf
 

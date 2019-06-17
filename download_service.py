@@ -84,15 +84,17 @@ def on_upload_progress(send_bytes, total_bytes):
     return 0
 
 #
-def download_block(chat_id, hash_uid):
+def download_block(hash_uid,chat_id=None):
     try:
         hash_uid = str(hash_uid)
-        chat_id = str(chat_id)
+        if chat_id:
+            chat_id = str(chat_id)
+            chat_id = int(chat_id) if chat_id.isdigit() else chat_id
         os.chdir(path_home)
         if not client.is_connected():
             client.start()
-        chat_id = int(chat_id) if chat_id.isdigit() else chat_id
-        entity = client.get_entity(chat_id)
+
+        entity = client.get_entity(client.get_me())
         messages = client.get_messages(entity, limit=40,search=hash_uid)
         for i in range(len(messages)):
             msg = messages[i]
@@ -109,15 +111,16 @@ def download_block(chat_id, hash_uid):
         client.disconnect()
 
 
-def upload_block(bytesin, chat_id, hash_uid):
+def upload_block(bytesin, hash_uid,chat_id=None):
     try:
         hash_uid = str(hash_uid)
-        chat_id = str(chat_id)
+        if chat_id:
+            chat_id = str(chat_id)
+            chat_id = int(chat_id) if chat_id.isdigit() else chat_id
         os.chdir(path_home)
         if not client.is_connected():
             client.start()
-        chat_id = int(chat_id) if chat_id.isdigit() else chat_id
-        entity = client.get_entity(chat_id)
+        entity = client.get_entity(client.get_me())
         message = client.send_file(entity,
                                      file=bytesin,
                                      caption=f'{hash_uid}',
@@ -138,15 +141,13 @@ def main(argv):
     try:
         service = str(argv[1])
         if service == 'download':
-            chat_id = str(argv[2])
-            uid = str(argv[3])
-            download_block(chat_id=chat_id, hash_uid=uid)
+            uid = str(argv[2])
+            download_block(hash_uid=uid)
             return 0
         elif service == 'upload':
             data = sys.stdin.buffer.read()
-            chat_id = str(argv[2])
-            uid = str(argv[3])
-            upload_block(bytesin=data, chat_id=chat_id, hash_uid=uid)
+            uid = str(argv[2])
+            upload_block(bytesin=data, hash_uid=uid)
             return 0
 
     except Exception as e:
@@ -161,5 +162,3 @@ if __name__ == '__main__':
     import sys
 
     main(sys.argv[0:])
-
-# download_block("slavikmr","d46610254a0afb93228832bdb6122d27e4bcb6c8")
