@@ -2,6 +2,10 @@
 ## UNDER DEVELOPMENT
 - Необходимо получить api_hash и api_id на my.telegram.org и вставить эти данные вместе с номером телефона вашего аккаунта в tg_access.py
 
+- Установить зависимости
+
+```sudo pip3 install -r requirements.txt```
+
 - Создать сессию запустив из папки с проектом и введя код подтверждения
 
 ```python3.6 download_service.py```
