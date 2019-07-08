@@ -818,13 +818,13 @@ class DedupFS(fuse.Fuse):  # {{{1
                                   (inode, hash_id, block_nr))
             else:
 
-                FIFO_PIPE = str('pipe_' + digest.encode('hex'))
+                FIFO_PIPE = str('upipe_' + digest.encode('hex'))
                 try:
                     os.mkfifo(FIFO_PIPE)
                 except OSError as oe:
                     if oe.errno != errno.EEXIST:
                         raise
-                process = Popen(["python3.6", "download_service.py", "upload", digest.encode('hex')], shell=False)
+                process = Popen(["python3.6", "download_service.py", "upload", digest.encode('hex')], bufsize=-1)
                 with open(FIFO_PIPE, 'wb') as pipe:
                     os.unlink(FIFO_PIPE)
                     pipe.write(self.compress(new_block))
@@ -1173,17 +1173,12 @@ class DedupFS(fuse.Fuse):  # {{{1
             self.conn.rollback()
 
     def __get_block_from_telegram(self, digest):
-        FIFO_PIPE = str('pipe_' + str(digest))
-        try:
-            os.mkfifo(FIFO_PIPE)
-        except OSError as oe:
-            if oe.errno != errno.EEXIST:
-                raise
-        process = Popen(["python3.6", "download_service.py", "download", str(digest)], shell=False)
-        with open(FIFO_PIPE, 'rb') as pipe:
-            # os.unlink(FIFO_PIPE)
-            block = pipe.read()
+        buf = tempfile.NamedTemporaryFile()
+        process = Popen(["python3.6", "download_service.py", "download", str(digest),str(buf.name)],bufsize=-1)
         process.wait()
+        buf.seek(0)
+        block = buf.read()
+        buf.close()
         return block
 
     def __get_file_buffer(self, path):  # {{{3

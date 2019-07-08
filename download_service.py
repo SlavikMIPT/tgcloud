@@ -10,7 +10,7 @@ from telethon.tl.types import DocumentAttributeFilename
 
 from telethon.telegram_client import TelegramClient
 from telegram_client_x import TelegramClientX
-from secret import *
+from secret_my import *
 
 path_home = './'  # os.path.abspath('.')
 client = TelegramClientX(entity, api_id, api_hash, update_workers=None, spawn_read_thread=True)
@@ -46,7 +46,7 @@ def on_upload_progress(send_bytes, total_bytes):
 
 
 #
-def download_block(hash_uid):
+def download_block(hash_uid, filename):
     try:
         hash_uid = str(hash_uid)
         os.chdir(path_home)
@@ -56,16 +56,17 @@ def download_block(hash_uid):
         for i in range(len(messages)):
             msg = messages[i]
             if msg.message == hash_uid:
-                FIFO = f"pipe_{hash_uid}"
-                import errno
-                try:
-                    os.mkfifo(FIFO)
-                except OSError as oe:
-                    if oe.errno != errno.EEXIST:
-                        raise
-                with open(FIFO, 'wb') as outbuf:
-                    os.unlink(FIFO)
-                    client.download_media(msg, file=outbuf, progress_callback=on_download_progress)
+                # FIFO = f"dpipe_{hash_uid}"
+                # import errno
+                # try:
+                #     os.mkfifo(FIFO)
+                # except OSError as oe:
+                #     if oe.errno != errno.EEXIST:
+                #         raise
+                # outbuf = open(FIFO, "wb"):
+                    # os.unlink(FIFO)
+                client.download_media(msg, file=filename, progress_callback=on_download_progress)
+                    # outbuf.flush()
                 return 0
     except Exception as e:
         return -1
@@ -78,7 +79,7 @@ def upload_block(hash_uid):
         hash_uid = str(hash_uid)
         os.chdir(path_home)
         entity = client.get_entity(client.get_me())
-        FIFO = f"pipe_{hash_uid}"
+        FIFO = f"upipe_{hash_uid}"
         import errno
         try:
             os.mkfifo(FIFO)
@@ -94,7 +95,6 @@ def upload_block(hash_uid):
                                        part_size_kb=512,
                                        force_document=True,
                                        progress_callback=on_upload_progress)
-        # message.id
         return 0
     except Exception:
         return -1
@@ -107,7 +107,8 @@ def main(argv):
         service = str(argv[1])
         if service == 'download':
             uid = str(argv[2])
-            download_block(hash_uid=uid)
+            filename = str (argv[3])
+            download_block(hash_uid=uid,filename=filename)
             return 0
         elif service == 'upload':
             uid = str(argv[2])
