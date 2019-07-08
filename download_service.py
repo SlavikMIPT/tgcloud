@@ -10,7 +10,7 @@ from telethon.tl.types import DocumentAttributeFilename
 
 from telethon.telegram_client import TelegramClient
 from telegram_client_x import TelegramClientX
-from secret_my import *
+from secret import *
 
 path_home = './'  # os.path.abspath('.')
 client = TelegramClientX(entity, api_id, api_hash, update_workers=None, spawn_read_thread=True)
