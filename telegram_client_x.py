@@ -1,12 +1,12 @@
 import hashlib
+import io
 import logging
 import os
+import random
+import time
 from io import BytesIO
 
 from telethon.crypto import CdnDecrypter
-from telethon.errors import (
-    FileMigrateError
-)
 from telethon.tl.custom import InputSizedFile
 from telethon.tl.functions.upload import (
     SaveBigFilePartRequest, SaveFilePartRequest, GetFileRequest
@@ -24,14 +24,16 @@ try:
     import hachoir.parser
 except ImportError:
     hachoir = None
+
 from telethon import helpers, utils
+from telethon.errors import FileMigrateError
+
 from telethon.tl.types import (InputFile, InputFileBig)
+from telethon.extensions import markdown
 
 __log__ = logging.getLogger(__name__)
 from telethon import TelegramClient
 from threading import Thread
-import random
-import time
 from queue import Queue
 from telethon.network import ConnectionTcpFull
 from datetime import timedelta
@@ -62,10 +64,14 @@ class TelegramClientX(TelegramClient):
         self._event_builders = []
         self._events_pending_resolve = []
 
+        # Default parse mode
+        self._parse_mode = markdown
+
         # Some fields to easy signing in. Let {phone: hash} be
         # a dictionary because the user may change their mind.
         self._phone_code_hash = {}
         self._phone = None
+        self._tos = None
         self._session_name = session
         self._upload_threads_count = 8
         self._download_threads_count = 8
@@ -83,7 +89,7 @@ class TelegramClientX(TelegramClient):
 
         def run(self):
             # print('Thread %s started' % self.name)
-            # time.sleep(random.randrange(200, 2000, 10) * 0.001)
+            time.sleep(random.randrange(20, 200, 10) * 0.001)
             if not self.client.is_connected():
                 self.client.connect()
             while True:
@@ -211,7 +217,7 @@ class TelegramClientX(TelegramClient):
                      file_size, part_count, part_size)
 
         with open(file, 'rb') if isinstance(file, str) else BytesIO(file) as stream:
-            threads_count = 2 + int((self._upload_threads_count - 2) * float(file_size) / (1024 * 1024 * 100))
+            threads_count = 2 + int((self._upload_threads_count - 2) * float(file_size) / (1024 * 1024 * 10))
             threads_count = min(threads_count, self._upload_threads_count)
             threads_count = min(part_count, threads_count)
             upload_thread = []
@@ -269,7 +275,7 @@ class TelegramClientX(TelegramClient):
 
         def run(self):
             # print('Thread %s started' % self.name)
-            # time.sleep(random.randrange(200, 2000, 10) * 0.001)
+            time.sleep(random.randrange(20, 200, 10) * 0.001)
             if not self.client.is_connected():
                 self.client.connect()
             while True:
@@ -277,7 +283,6 @@ class TelegramClientX(TelegramClient):
                 if request is None:
                     break
                 self.result = None
-                # time.sleep(random.randrange(20, 100, 1) * 0.001)
                 if isinstance(request, CdnDecrypter):
                     self.result = request.get_file()
                 else:
@@ -337,7 +342,10 @@ class TelegramClientX(TelegramClient):
             raise ValueError(
                 'The part size must be evenly divisible by 4096.')
 
-        if isinstance(file, str):
+        in_memory = file is None
+        if in_memory:
+            f = io.BytesIO()
+        elif isinstance(file, str):
             # Ensure that we'll be able to download the media
             helpers.ensure_parent_dir_exists(file)
             f = open(file, 'wb')
@@ -347,12 +355,12 @@ class TelegramClientX(TelegramClient):
         # The used client will change if FileMigrateError occurs
         client = self
         cdn_decrypter = None
-        input_location = utils.get_input_loction(input_location)
+        input_location = utils.get_input_location(input_location)
         download_thread = []
         q_request = []
 
         __log__.info('Downloading file in chunks of %d bytes', part_size)
-        threads_count = 2 + int((self._download_threads_count - 2) * float(file_size) / (1024 * 1024 * 100))
+        threads_count = 2 + int((self._download_threads_count - 2) * float(file_size) / (1024 * 1024 * 10))
         threads_count = min(threads_count, self._download_threads_count)
         # threads_count = 1
         # threads_count = min(part_count, threads_count)

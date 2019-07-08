@@ -1,34 +1,53 @@
 # tgcloud
-## UNDER DEVELOPMENT
-- Необходимо получить api_hash и api_id на my.telegram.org и вставить эти данные вместе с номером телефона вашего аккаунта в tg_access.py
+## UNDER DEVELOPMENT v1.1
+- `secret.py` : вставить `api_hash` и `api_id` полученные с  https://my.telegram.org
 
+- Установить Python2.7 и Python3.6
+
+- Скачать исходный код
+```
+cd ~
+git clone https://github.com/SlavikMIPT/tgcloud.git
+```
 - Установить зависимости
 
-```sudo pip3 install -r requirements.txt```
+`sudo pip3 install -r requirements.txt`
+- Создать сессию запустив **из папки с проектом**
 
-- Создать сессию запустив из папки с проектом и введя код подтверждения(если запустить вне папки с проектом или без сессии - акк забанят и надо писать на  recover@telegram.org)
-
-```python3.6 download_service.py```
+`python3.6 telegram_create_session.py`
 
 - Установить fuse bindings
 
-```sudo yum install python-fuse```
+`sudo yum install python-fuse`
 
 - Создать папку для монтирования 
 
-```mkdir storage```
+`mkdir storage`
 
-- Запустить VFS: 
+- Запустить VFS **из папки с проектом**: 
 
 с отладкой 
 
-```python dedupfs/dedupfs.py -df --block-size 10240000 storage/```
+`python2.7 dedupfs/dedupfs.py -df --block-size 20971520 -o auto_unmount -o hard_remove storage/`
 
 в фоне 
 
-```python dedupfs/dedupfs.py --block-size 10240000 storage/```
+отредактировать `<username>` в `tgcloud.service`
+```
+sudo cp tgcloud.service /ect/systemd/system/
+sudo systemctl enable tgcloud.service
+sudo systemctl daemon-reload
+sudo systemctl start tgcloud.service
+sudo systemctl status tgcloud.service -l
+```
 
-- Можно, например указать эту папку как источник для [filebrowser](https://github.com/filebrowser/filebrowser)
+Версия 1.1
+
+Работает пободрее, но все еще сырой прототип - может падать.
+
+Для тестов лучше использовать отдельный профиль. 
+
+Если забанят - пишите `recover@telegram.org` - разбанят
 
 You are welcome to collaborate - contact 
 Telegram: [@SlavikMIPT](t.me/SlavikMIPT)

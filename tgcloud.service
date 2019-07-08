@@ -1,0 +1,12 @@
+[Unit]
+Description=Open-source Telegram VFS
+[Service]
+WorkingDirectory=/home/<username>/tgcloud
+#ExecStart=/bin/python2.7 dedupfs/dedupfs.py -f --block-size 20971520 -o auto_unmount -o direct_io -o no_splice_write -o no_splice_read -o no_splice_move storage/
+ExecStart=/bin/python2.7 dedupfs/dedupfs.py -f --block-size 20971520 -o hard_remove -o auto_unmount storage/
+Restart=always
+RestartSec=10
+SyslogIdentifier=tgcloud-dedupfs-fuse
+User=<username>
+[Install]
+WantedBy=multi-user.target
