@@ -24,8 +24,6 @@ Copyright 2010 Peter Odding <peter@peterodding.com>.
 
 # Check the Python version, warn the user if untested.
 import sys
-import subprocess
-import os
 
 flagone = True
 if sys.version_info[:2] != (2, 6):
@@ -63,9 +61,8 @@ except ImportError:
 from my_formats import format_size, format_timespan
 from get_memory_usage import get_memory_usage
 
-from subprocess import Popen, PIPE
+from subprocess import Popen
 
-# chat_id = 709766994
 def main():  # {{{1
     """
     This function enables using dedupfs.py as a shell script that creates FUSE
@@ -796,7 +793,7 @@ class DedupFS(fuse.Fuse):  # {{{1
             buf.seek(self.block_size * block_nr, os.SEEK_SET)
             new_block = buf.read(self.block_size)
             digest = self.__hash(new_block)
-            encoded_digest = digest.encode('hex')#sqlite3.Binary(digest)
+            encoded_digest = digest.encode('hex')  # sqlite3.Binary(digest)
             row = self.conn.execute('SELECT id FROM hashes WHERE hash = ?', (encoded_digest,)).fetchone()
             if row:
                 hash_id = row[0]
@@ -820,10 +817,17 @@ class DedupFS(fuse.Fuse):  # {{{1
                 self.conn.execute('INSERT INTO "index" (inode, hash_id, block_nr) VALUES (?, ?, ?)',
                                   (inode, hash_id, block_nr))
             else:
-                process = Popen(["python3.6", "download_service.py", "upload", digest.encode('hex')], stdin=PIPE,
-                                bufsize=-1)
-                process.stdin.write(self.compress(new_block))
-                process.stdin.close()
+
+                FIFO_PIPE = str('pipe_' + digest.encode('hex'))
+                try:
+                    os.mkfifo(FIFO_PIPE)
+                except OSError as oe:
+                    if oe.errno != errno.EEXIST:
+                        raise
+                process = Popen(["python3.6", "download_service.py", "upload", digest.encode('hex')], shell=False)
+                with open(FIFO_PIPE, 'wb') as pipe:
+                    os.unlink(FIFO_PIPE)
+                    pipe.write(self.compress(new_block))
                 process.wait()
 
                 # self.blocks[digest] = self.compress(new_block)
@@ -1169,13 +1173,17 @@ class DedupFS(fuse.Fuse):  # {{{1
             self.conn.rollback()
 
     def __get_block_from_telegram(self, digest):
-        buf = tempfile.NamedTemporaryFile()
-        process = Popen(["python3.6", "download_service.py", "download", str(digest)], stdout=buf,
-                        bufsize=-1, shell=False)
+        FIFO_PIPE = str('pipe_' + str(digest))
+        try:
+            os.mkfifo(FIFO_PIPE)
+        except OSError as oe:
+            if oe.errno != errno.EEXIST:
+                raise
+        process = Popen(["python3.6", "download_service.py", "download", str(digest)], shell=False)
+        with open(FIFO_PIPE, 'rb') as pipe:
+            # os.unlink(FIFO_PIPE)
+            block = pipe.read()
         process.wait()
-        buf.seek(0)
-        block = buf.read()
-        buf.close()
         return block
 
     def __get_file_buffer(self, path):  # {{{3

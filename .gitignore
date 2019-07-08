@@ -1,2 +1,6 @@
 .idea
 /tg_access.py
+__pycache__
+*.session
+/secret.py.bk.py
+/test.py
