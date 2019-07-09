@@ -1,6 +1,6 @@
 # tgcloud
 ## UNDER DEVELOPMENT v1.1
-!()[demo.gif]
+![](img/demo.gif)
 - `secret.py` : rename `secret.py.template`, insert `api_hash` and `api_id` obtained with  https://my.telegram.org
 
 - Install Python2.7 and Python3.6
@@ -51,6 +51,8 @@ Can crash, it is unstable and slow in some cases .
 For tests, it is better to use a separate telegram profile.
 
 If banned - mail `recover@telegram.org`
+
+You can try to use web based ![filebrowser](https://github.com/filebrowser/filebrowser/blob/master/README.md) or SFTP
 
 You are welcome to collaborate - contact 
 Telegram: [@SlavikMIPT](t.me/SlavikMIPT)
