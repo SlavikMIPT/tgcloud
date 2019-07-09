@@ -1,6 +1,6 @@
 # tgcloud
 ## UNDER DEVELOPMENT v1.1
-- `secret.py` : вставить `api_hash` и `api_id` полученные с  https://my.telegram.org
+- `secret.py` : переименовать`secret.py.template`, вставить `api_hash` и `api_id` полученные с  https://my.telegram.org
 
 - Установить Python2.7 и Python3.6
 
