@@ -1,38 +1,39 @@
 # tgcloud
 ## UNDER DEVELOPMENT v1.1
-- `secret.py` : переименовать`secret.py.template`, вставить `api_hash` и `api_id` полученные с  https://my.telegram.org
+!()[demo.gif]
+- `secret.py` : rename `secret.py.template`, insert `api_hash` and `api_id` obtained with  https://my.telegram.org
 
-- Установить Python2.7 и Python3.6
+- Install Python2.7 and Python3.6
 
-- Скачать исходный код
+- Clone the repository
 ```
 cd ~
 git clone https://github.com/SlavikMIPT/tgcloud.git
 ```
-- Установить зависимости
+- Install requirements for Python3.6
 
 `sudo pip3 install -r requirements.txt`
-- Создать сессию запустив **из папки с проектом**
+- Create a session by running  **from the project folder**
 
 `python3.6 telegram_create_session.py`
 
-- Установить fuse bindings
+- Install fuse bindings
 
 `sudo yum install python-fuse`
 
-- Создать папку для монтирования 
+- Create Mount Folder
 
 `mkdir storage`
 
-- Запустить VFS **из папки с проектом**: 
+- Run VFS **from the project folder**: 
 
-с отладкой 
+#### debug:
 
 `python2.7 dedupfs/dedupfs.py -df --block-size 20971520 -o auto_unmount -o hard_remove storage/`
 
-в фоне 
+#### as a service:
 
-отредактировать `<username>` в `tgcloud.service`
+replace `<username>` in `tgcloud.service`
 ```
 sudo cp tgcloud.service /ect/systemd/system/
 sudo systemctl enable tgcloud.service
@@ -41,13 +42,15 @@ sudo systemctl start tgcloud.service
 sudo systemctl status tgcloud.service -l
 ```
 
-Версия 1.1
+Version 1.1
 
-Работает пободрее, но все еще сырой прототип - может падать.
+It works more vigorously, but still a raw prototype - just POC 
 
-Для тестов лучше использовать отдельный профиль. 
+Can crash, it is unstable and slow in some cases .
 
-Если забанят - пишите `recover@telegram.org` - разбанят
+For tests, it is better to use a separate telegram profile.
+
+If banned - mail `recover@telegram.org`
 
 You are welcome to collaborate - contact 
 Telegram: [@SlavikMIPT](t.me/SlavikMIPT)
