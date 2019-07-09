@@ -4,3 +4,4 @@ __pycache__
 *.session
 /secret.py.bk.py
 /test.py
+/secret.py
