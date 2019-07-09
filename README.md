@@ -52,7 +52,7 @@ For tests, it is better to use a separate telegram profile.
 
 If banned - mail `recover@telegram.org`
 
-You can try to use web based ![filebrowser](https://github.com/filebrowser/filebrowser/blob/master/README.md) or SFTP
+You can try to use web based ![filebrowser](https://github.com/filebrowser/filebrowser) or SFTP
 
 You are welcome to collaborate - contact 
 Telegram: [@SlavikMIPT](t.me/SlavikMIPT)
