@@ -375,8 +375,8 @@ class TelegramClientX(TelegramClient):
                     cdn_decrypter, result = CdnDecrypter.prepare_decrypter(client, self._get_cdn_client(result), result)
                 else:
                     f.write(result.bytes)
-                    if callable(getattr(f, 'flush', None)):
-                        f.flush()
+                    # if callable(getattr(f, 'flush', None)):
+                    #     f.flush()
                     offset += part_size
             except FileMigrateError as e:
                 __log__.info('File lives in another DC')
@@ -412,8 +412,8 @@ class TelegramClientX(TelegramClient):
                 for th in download_thread:
                     if th.result and th.result.bytes:
                         f.write(th.result.bytes)
-                        if callable(getattr(f, 'flush', None)):
-                            f.flush()
+                        # if callable(getattr(f, 'flush', None)):
+                        #     f.flush()
                         if progress_callback:
                             progress_callback(f.tell(), file_size)
                     else:
