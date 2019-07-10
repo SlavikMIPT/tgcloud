@@ -6,11 +6,11 @@ from __future__ import unicode_literals
 
 import os
 import time
-
 from telethon.tl.types import DocumentAttributeFilename
 
-from secret import *
+from telethon.telegram_client import TelegramClient
 from telegram_client_x import TelegramClientX
+from secret import *
 
 path_home = './'  # os.path.abspath('.')
 client = TelegramClientX(entity, api_id, api_hash, update_workers=None, spawn_read_thread=True)
@@ -64,9 +64,9 @@ def download_block(hash_uid, filename):
                 #     if oe.errno != errno.EEXIST:
                 #         raise
                 # outbuf = open(FIFO, "wb"):
-                # os.unlink(FIFO)
+                    # os.unlink(FIFO)
                 client.download_media(msg, file=filename, progress_callback=on_download_progress)
-                # outbuf.flush()
+                    # outbuf.flush()
                 return 0
     except Exception as e:
         return -1
@@ -80,15 +80,18 @@ def upload_block(hash_uid):
         os.chdir(path_home)
         entity = client.get_entity(client.get_me())
         FIFO = f"upipe_{hash_uid}"
+
         import errno
         try:
             os.mkfifo(FIFO)
         except OSError as oe:
             if oe.errno != errno.EEXIST:
                 raise
-        messages = client.get_messages(entity, limit=1, search=hash_uid)
+        messages = client.get_messages(entity, limit=1, search=hash_uid)   
         with open(FIFO, 'rb') as bytesin:
-            if messages:
+            if len(messages):
+                bytesin.read(1)
+                bytesin.close()
                 return 0
             message = client.send_file(entity,
                                        file=bytesin,
@@ -110,8 +113,8 @@ def main(argv):
         service = str(argv[1])
         if service == 'download':
             uid = str(argv[2])
-            filename = str(argv[3])
-            download_block(hash_uid=uid, filename=filename)
+            filename = str (argv[3])
+            download_block(hash_uid=uid,filename=filename)
             return 0
         elif service == 'upload':
             uid = str(argv[2])
