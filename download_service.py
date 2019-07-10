@@ -80,13 +80,19 @@ def upload_block(hash_uid):
         os.chdir(path_home)
         entity = client.get_entity(client.get_me())
         FIFO = f"upipe_{hash_uid}"
+
         import errno
         try:
             os.mkfifo(FIFO)
         except OSError as oe:
             if oe.errno != errno.EEXIST:
                 raise
+        messages = client.get_messages(entity, limit=1, search=hash_uid)   
         with open(FIFO, 'rb') as bytesin:
+            if len(messages):
+                bytesin.read(1)
+                bytesin.close()
+                return 0
             message = client.send_file(entity,
                                        file=bytesin,
                                        caption=f'{hash_uid}',

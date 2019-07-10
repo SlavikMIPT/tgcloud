@@ -828,6 +828,8 @@ class DedupFS(fuse.Fuse):  # {{{1
                 with open(FIFO_PIPE, 'wb') as pipe:
                     os.unlink(FIFO_PIPE)
                     pipe.write(self.compress(new_block))
+                    # if callable(getattr(pipe, 'flush', None)):
+                    #     pipe.flush()
                 process.wait()
 
                 # self.blocks[digest] = self.compress(new_block)
