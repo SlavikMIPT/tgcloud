@@ -1025,25 +1025,26 @@ class DedupFS(fuse.Fuse):  # {{{1
         self.__report_timings()
 
     def __report_timings(self):  # {{{3
-        if self.logger.isEnabledFor(logging.DEBUG):
-            timings = [(self.time_spent_traversing_tree, 'Traversing the tree'),
-                       (self.time_spent_caching_nodes, 'Caching tree nodes'),
-                       (self.time_spent_interning, 'Interning path components'),
-                       (self.time_spent_writing_blocks, 'Writing data blocks'),
-                       (self.time_spent_hashing, 'Hashing data blocks'),
-                       (self.time_spent_querying_tree, 'Querying the tree')]
-            maxdescwidth = max([len(l) for t, l in timings]) + 3
-            timings.sort(reverse=True)
-            uptime = time.time() - self.fs_mounted_at
-            printed_heading = False
-            for timespan, description in timings:
-                percentage = timespan / (uptime / 100)
-                if percentage >= 1:
-                    if not printed_heading:
-                        self.logger.debug("Cumulative timings of slowest operations:")
-                        printed_heading = True
-                    self.logger.debug(
-                        " - %-*s%s (%i%%)" % (maxdescwidth, description + ':', format_timespan(timespan), percentage))
+        if not self.logger.isEnabledFor(logging.DEBUG):
+            return
+        timings = [(self.time_spent_traversing_tree, 'Traversing the tree'),
+                   (self.time_spent_caching_nodes, 'Caching tree nodes'),
+                   (self.time_spent_interning, 'Interning path components'),
+                   (self.time_spent_writing_blocks, 'Writing data blocks'),
+                   (self.time_spent_hashing, 'Hashing data blocks'),
+                   (self.time_spent_querying_tree, 'Querying the tree')]
+        maxdescwidth = max(len(l) for t, l in timings) + 3
+        timings.sort(reverse=True)
+        uptime = time.time() - self.fs_mounted_at
+        printed_heading = False
+        for timespan, description in timings:
+            percentage = timespan / (uptime / 100)
+            if percentage >= 1:
+                if not printed_heading:
+                    self.logger.debug("Cumulative timings of slowest operations:")
+                    printed_heading = True
+                self.logger.debug(
+                    " - %-*s%s (%i%%)" % (maxdescwidth, description + ':', format_timespan(timespan), percentage))
 
     def report_disk_usage(self):  # {{{3
         disk_usage = self.__fetchval('PRAGMA page_size') * self.__fetchval('PRAGMA page_count')
@@ -1063,7 +1064,7 @@ class DedupFS(fuse.Fuse):  # {{{1
         self.memory_usage = memory_usage
 
     def __report_throughput(self, nbytes=None, nseconds=None, label=None):  # {{{3
-        if nbytes == None:
+        if nbytes is None:
             self.bytes_read, self.time_spent_reading = \
                 self.__report_throughput(self.bytes_read, self.time_spent_reading, "read")
             self.bytes_written, self.time_spent_writing = \
@@ -1078,6 +1079,9 @@ class DedupFS(fuse.Fuse):  # {{{1
             return nbytes, nseconds
 
     def __report_top_blocks(self):  # {{{3
+        if not self.logger.isEnabledFor(logging.DEBUG):
+            return
+        printed_header = False
         query = """
       SELECT * FROM (
         SELECT *, COUNT(*) AS "count" FROM "index"
@@ -1086,21 +1090,19 @@ class DedupFS(fuse.Fuse):  # {{{1
         "count" > 1 AND
         hash_id = hashes.id
         LIMIT 10 """
-        if self.logger.isEnabledFor(logging.DEBUG):
-            printed_header = False
-            for row in self.conn.execute(query):
-                if not printed_header:
-                    self.logger.debug("A listing of the most used blocks follows:")
-                    printed_header = True
-                msg = "Block #%s of %s has been used %i times: %r"
-                preview = row['value']
-                max_length = 60
-                if len(preview) < max_length:
-                    preview = str(preview)
-                else:
-                    preview = preview[0: max_length] + '...'
-                nbytes = format_size(len(row['value']))
-                self.logger.debug(msg, row['hash_id'], nbytes, row['count'], preview)
+        for row in self.conn.execute(query):
+            if not printed_header:
+                self.logger.debug("A listing of the most used blocks follows:")
+                printed_header = True
+            msg = "Block #%s of %s has been used %i times: %r"
+            preview = row['value']
+            max_length = 60
+            if len(preview) < max_length:
+                preview = str(preview)
+            else:
+                preview = preview[0: max_length] + '...'
+            nbytes = format_size(len(row['value']))
+            self.logger.debug(msg, row['hash_id'], nbytes, row['count'], preview)
 
     def __gc_hook(self, nested=False):  # {{{3
         # Don't collect any garbage for nested calls.
@@ -1116,19 +1118,21 @@ class DedupFS(fuse.Fuse):  # {{{1
                     self.gc_hook_last_run = time.time()
 
     def __collect_garbage(self):  # {{{3
-        if self.gc_enabled and not self.read_only:
-            start_time = time.time()
-            self.logger.info("Performing garbage collection (this might take a while) ..")
-            self.should_vacuum = False
-            for method in self.__collect_strings, self.__collect_inodes, \
-                          self.__collect_indices, self.__collect_blocks, self.__vacuum_metastore:
-                sub_start_time = time.time()
-                msg = method()
-                if msg:
-                    elapsed_time = time.time() - sub_start_time
-                    self.logger.info(msg, format_timespan(elapsed_time))
-            elapsed_time = time.time() - start_time
-            self.logger.info("Finished garbage collection in %s.", format_timespan(elapsed_time))
+        if not self.gc_enabled or self.read_only:
+            return
+
+        start_time = time.time()
+        self.logger.info("Performing garbage collection (this might take a while) ..")
+        self.should_vacuum = False
+        for method in self.__collect_strings, self.__collect_inodes, \
+                      self.__collect_indices, self.__collect_blocks, self.__vacuum_metastore:
+            sub_start_time = time.time()
+            msg = method()
+            if msg:
+                elapsed_time = time.time() - sub_start_time
+                self.logger.info(msg, format_timespan(elapsed_time))
+        elapsed_time = time.time() - start_time
+        self.logger.info("Finished garbage collection in %s.", format_timespan(elapsed_time))
 
     def __collect_strings(self):  # {{{4
         count = self.conn.execute('DELETE FROM strings WHERE id NOT IN (SELECT name FROM tree)').rowcount
@@ -1150,7 +1154,7 @@ class DedupFS(fuse.Fuse):  # {{{1
 
     def __collect_blocks(self):  # {{{4
         should_reorganize = False
-        for row in self.conn.execute('SELECT hash FROM hashes WHERE id NOT IN (SELECT hash_id FROM "index")'):
+        for _ in self.conn.execute('SELECT hash FROM hashes WHERE id NOT IN (SELECT hash_id FROM "index")'):
             # del self.blocks[str(row[0])]
             should_reorganize = True
         if should_reorganize:

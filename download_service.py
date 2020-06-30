@@ -53,8 +53,8 @@ def download_block(hash_uid, filename):
 
         entity = client.get_entity(client.get_me())
         messages = client.get_messages(entity, limit=1, search=hash_uid)
-        for i in range(len(messages)):
-            msg = messages[i]
+        for message in messages:
+            msg = message
             if msg.message == hash_uid:
                 # FIFO = f"dpipe_{hash_uid}"
                 # import errno

@@ -73,8 +73,12 @@ def get_compat_0_1():
 
 
 # API version to be used
-fuse_python_api = __getenv__('FUSE_PYTHON_API', '^[\d.]+$',
-                             lambda x: tuple([int(i) for i in x.split('.')]))
+fuse_python_api = __getenv__(
+    'FUSE_PYTHON_API',
+    '^[\d.]+$',
+    lambda x: tuple(int(i) for i in x.split('.')),
+)
+
 
 # deprecated way of API specification
 compat_0_1 = __getenv__('FUSE_PYTHON_COMPAT', '^(0.1|ALL)$', lambda x: True)
@@ -126,9 +130,7 @@ class FuseArgs(SubOptsHive):
     def mount_expected(self):
         if self.getmod('showhelp'):
             return False
-        if self.getmod('showversion'):
-            return False
-        return True
+        return not self.getmod('showversion')
 
     def assemble(self):
         """Mangle self into an argument array"""
@@ -141,9 +143,7 @@ class FuseArgs(SubOptsHive):
             if v:
                 args.append(self.fuse_modifiers[m])
 
-        opta = []
-        for o, v in self.optdict.iteritems():
-            opta.append(o + '=' + v)
+        opta = [o + '=' + v for o, v in self.optdict.iteritems()]
         opta.extend(self.optlist)
 
         if opta:
@@ -167,7 +167,7 @@ class FuseArgs(SubOptsHive):
 class FuseFormatter(SubbedOptIndentedFormatter):
 
     def __init__(self, **kw):
-        if not 'indent_increment' in kw:
+        if 'indent_increment' not in kw:
             kw['indent_increment'] = 4
         SubbedOptIndentedFormatter.__init__(self, **kw)
 
@@ -338,7 +338,7 @@ class FuseOptParse(SubbedOptParse):
                     "having options or specifying the `subopt' attribute conflicts with `mountopt' attribute")
             opts = ('-o',)
             attrs['subopt'] = attrs.pop('mountopt')
-            if not 'dest' in attrs:
+            if 'dest' not in attrs:
                 attrs['dest'] = attrs['subopt']
 
         SubbedOptParse.add_option(self, *opts, **attrs)
@@ -559,8 +559,7 @@ def feature_needs(*feas):
                 maxva[0] = max(maxva[0], fp)
                 continue
             if isinstance(fp, list) or isinstance(fp, tuple):
-                for f in fp:
-                    yield f
+                yield from fp
                 continue
             ma = isinstance(fp, str) and re.compile("(!\s*|)re:(.*)").match(fp)
             if isinstance(fp, type(re.compile(''))) or ma:
@@ -574,7 +573,7 @@ def feature_needs(*feas):
                         yield f
                 continue
             ma = re.compile("has_(.*)").match(fp)
-            if ma and ma.groups()[0] in Fuse._attrs and not fp in fmap:
+            if ma and ma.groups()[0] in Fuse._attrs and fp not in fmap:
                 yield 21
                 continue
             yield fmap[fp]
@@ -728,8 +727,10 @@ class Fuse(object):
         if get_compat_0_1():
             args = self.main_0_1_preamble()
 
-        d = {'multithreaded': self.multithreaded and 1 or 0}
-        d['fuse_args'] = args or self.fuse_args.assemble()
+        d = {
+            'multithreaded': self.multithreaded and 1 or 0,
+            'fuse_args': args or self.fuse_args.assemble(),
+        }
 
         for t in 'file_class', 'dir_class':
             if hasattr(self, t):

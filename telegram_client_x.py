@@ -187,11 +187,7 @@ class TelegramClientX(TelegramClient):
         # Set a default file name if None was specified
         file_id = helpers.generate_random_long()
         if not file_name:
-            if isinstance(file, str):
-                file_name = os.path.basename(file)
-            else:
-                file_name = str(file_id)
-
+            file_name = os.path.basename(file) if isinstance(file, str) else str(file_id)
         # Determine whether the file is too big (over 10MB) or not
         # Telegram does make a distinction between smaller or larger files
         is_large = file_size > 10 * 1024 * 1024
